@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Double Pendulum Lab</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand-block">
+          <p class="eyebrow">science games</p>
+          <h1>Double Pendulum Lab</h1>
+        </div>
+        <div class="readout-strip" aria-live="polite">
+          <div class="readout">
+            <span>time</span>
+            <strong id="timeReadout">0.0s</strong>
+          </div>
+          <div class="readout">
+            <span>energy drift</span>
+            <strong id="energyReadout">0.00%</strong>
+          </div>
+          <div class="readout">
+            <span>chaos</span>
+            <strong id="chaosReadout">0</strong>
+          </div>
+          <div class="readout">
+            <span>score</span>
+            <strong id="scoreReadout">100</strong>
+          </div>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <section class="stage-panel" aria-label="Double pendulum animation">
+          <canvas id="pendulumCanvas" class="stage-canvas" width="900" height="720"></canvas>
+          <div class="state-row">
+            <div><span>theta 1</span><strong id="theta1Readout">120 deg</strong></div>
+            <div><span>theta 2</span><strong id="theta2Readout">-30 deg</strong></div>
+            <div><span>omega 1</span><strong id="omega1Readout">0.00</strong></div>
+            <div><span>omega 2</span><strong id="omega2Readout">0.00</strong></div>
+          </div>
+        </section>
+
+        <aside class="side-panel" aria-label="Simulation controls and plots">
+          <section class="control-surface">
+            <div class="button-row">
+              <button id="toggleButton" class="primary-button" type="button">Pause</button>
+              <button id="resetButton" type="button">Reset</button>
+              <button id="randomButton" type="button">Randomize</button>
+            </div>
+
+            <div class="preset-row" aria-label="Presets">
+              <button type="button" data-preset="calm">Calm</button>
+              <button type="button" data-preset="chaos">Chaos</button>
+              <button type="button" data-preset="swing">Swing</button>
+            </div>
+
+            <div class="slider-grid">
+              <label>
+                <span>theta 1 <output id="theta1Value">120 deg</output></span>
+                <input id="theta1Input" type="range" min="-175" max="175" step="1" value="120">
+              </label>
+              <label>
+                <span>theta 2 <output id="theta2Value">-30 deg</output></span>
+                <input id="theta2Input" type="range" min="-175" max="175" step="1" value="-30">
+              </label>
+              <label>
+                <span>kick <output id="kickValue">0.00</output></span>
+                <input id="kickInput" type="range" min="-4" max="4" step="0.05" value="0">
+              </label>
+              <label>
+                <span>gravity <output id="gravityValue">9.81</output></span>
+                <input id="gravityInput" type="range" min="1" max="18" step="0.1" value="9.81">
+              </label>
+              <label>
+                <span>mass 2 <output id="mass2Value">1.00</output></span>
+                <input id="mass2Input" type="range" min="0.2" max="3" step="0.05" value="1">
+              </label>
+              <label>
+                <span>length 2 <output id="length2Value">1.00</output></span>
+                <input id="length2Input" type="range" min="0.35" max="1.5" step="0.01" value="1">
+              </label>
+              <label>
+                <span>damping <output id="dampingValue">0.004</output></span>
+                <input id="dampingInput" type="range" min="0" max="0.05" step="0.001" value="0.004">
+              </label>
+              <label>
+                <span>speed <output id="speedValue">1.00x</output></span>
+                <input id="speedInput" type="range" min="0.2" max="2.4" step="0.05" value="1">
+              </label>
+            </div>
+          </section>
+
+          <section class="plot-panel" aria-label="Double pendulum plots">
+            <canvas id="plotCanvas" class="plot-canvas" width="760" height="540"></canvas>
+          </section>
+
+          <section class="mission-panel" aria-label="Prototype loop">
+            <div>
+              <span class="mission-label">loop</span>
+              <strong>Tune - launch - read - retune</strong>
+            </div>
+            <p>Score favors low energy drift and a small shadow-pendulum separation.</p>
+          </section>
+        </aside>
+      </main>
+    </div>
+
+    <script src="src/simulation.js"></script>
+    <script src="src/app.js"></script>
+  </body>
+</html>
+
