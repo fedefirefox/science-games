@@ -8,9 +8,26 @@
 
   const sim = new DoublePendulumSim();
   const history = [];
+  const catFaces = {
+    first: new Image(),
+    second: new Image()
+  };
+  const turnTracker = {
+    previous: [0, 0],
+    marker: [0, 0],
+    accumulated: [0, 0]
+  };
+  const sound = {
+    enabled: false,
+    audioContext: null,
+    lastPlayedAt: 0
+  };
   let running = true;
   let lastTimestamp = 0;
   let sampleCarry = 0;
+
+  catFaces.first.src = "assets/cat-faces/noto-cat-open-mouth.svg";
+  catFaces.second.src = "assets/cat-faces/noto-cat-heart-eyes.svg";
 
   const els = {
     pendulumCanvas: document.getElementById("pendulumCanvas"),
@@ -18,11 +35,13 @@
     toggleButton: document.getElementById("toggleButton"),
     resetButton: document.getElementById("resetButton"),
     randomButton: document.getElementById("randomButton"),
+    miaoButton: document.getElementById("miaoButton"),
     theta1Input: document.getElementById("theta1Input"),
     theta2Input: document.getElementById("theta2Input"),
     kickInput: document.getElementById("kickInput"),
     gravityInput: document.getElementById("gravityInput"),
     mass2Input: document.getElementById("mass2Input"),
+    length1Input: document.getElementById("length1Input"),
     length2Input: document.getElementById("length2Input"),
     dampingInput: document.getElementById("dampingInput"),
     speedInput: document.getElementById("speedInput"),
@@ -31,6 +50,7 @@
     kickValue: document.getElementById("kickValue"),
     gravityValue: document.getElementById("gravityValue"),
     mass2Value: document.getElementById("mass2Value"),
+    length1Value: document.getElementById("length1Value"),
     length2Value: document.getElementById("length2Value"),
     dampingValue: document.getElementById("dampingValue"),
     speedValue: document.getElementById("speedValue"),
@@ -45,9 +65,9 @@
   };
 
   const presets = {
-    calm: { theta1: 55, theta2: 35, kick: 0, gravity: 9.81, mass2: 1, length2: 1.05, damping: 0.009 },
-    chaos: { theta1: 128, theta2: -73, kick: 0.35, gravity: 9.81, mass2: 1.25, length2: 0.92, damping: 0.002 },
-    swing: { theta1: 170, theta2: -12, kick: 1.25, gravity: 7.2, mass2: 0.85, length2: 1.22, damping: 0.004 }
+    calm: { theta1: 55, theta2: 35, kick: 0, gravity: 9.81, mass2: 1, length1: 0.9, length2: 1.05, damping: 0.009 },
+    chaos: { theta1: 128, theta2: -73, kick: 0.35, gravity: 9.81, mass2: 1.25, length1: 1, length2: 0.92, damping: 0.002 },
+    swing: { theta1: 170, theta2: -12, kick: 1.25, gravity: 7.2, mass2: 0.85, length1: 1.18, length2: 1.22, damping: 0.004 }
   };
 
   function formatDegrees(radians) {
@@ -74,6 +94,13 @@
     pushHistory();
   }
 
+  function resetTurnTracker() {
+    const state = sim.snapshot().state;
+    turnTracker.previous = [state[0], state[1]];
+    turnTracker.marker = [0, 0];
+    turnTracker.accumulated = [0, 0];
+  }
+
   function pushHistory() {
     const snap = sim.snapshot();
     history.push({
@@ -84,8 +111,8 @@
       omega2: snap.state[3],
       energyDrift: snap.energyDrift,
       separation: snap.separation,
-      x2: snap.positions[1].x,
-      y2: snap.positions[1].y
+      x: snap.positions[1].x,
+      y: snap.positions[1].y
     });
     while (history.length > HISTORY_LIMIT) {
       history.shift();
@@ -103,6 +130,7 @@
     sim.setParams({
       g: Number(els.gravityInput.value),
       m2: Number(els.mass2Input.value),
+      l1: Number(els.length1Input.value),
       l2: Number(els.length2Input.value),
       damping: Number(els.dampingInput.value)
     });
@@ -114,6 +142,7 @@
         omega1: 0,
         omega2: Number(els.kickInput.value)
       });
+      resetTurnTracker();
       clearHistory();
     }
     syncOutputLabels();
@@ -125,9 +154,12 @@
     els.kickValue.textContent = Number(els.kickInput.value).toFixed(2);
     els.gravityValue.textContent = Number(els.gravityInput.value).toFixed(2);
     els.mass2Value.textContent = Number(els.mass2Input.value).toFixed(2);
+    els.length1Value.textContent = Number(els.length1Input.value).toFixed(2);
     els.length2Value.textContent = Number(els.length2Input.value).toFixed(2);
     els.dampingValue.textContent = Number(els.dampingInput.value).toFixed(3);
     els.speedValue.textContent = `${Number(els.speedInput.value).toFixed(2)}x`;
+    els.miaoButton.textContent = sound.enabled ? "Miao: On" : "Miao: Off";
+    els.miaoButton.setAttribute("aria-pressed", sound.enabled ? "true" : "false");
   }
 
   function applyPreset(name) {
@@ -140,6 +172,7 @@
     els.kickInput.value = preset.kick;
     els.gravityInput.value = preset.gravity;
     els.mass2Input.value = preset.mass2;
+    els.length1Input.value = preset.length1;
     els.length2Input.value = preset.length2;
     els.dampingInput.value = preset.damping;
     applyInputs();
@@ -153,6 +186,80 @@
     els.theta2Input.value = theta2;
     els.kickInput.value = kick.toFixed(2);
     applyInputs();
+  }
+
+  function unlockAudio() {
+    if (!global.AudioContext && !global.webkitAudioContext) {
+      return null;
+    }
+    if (!sound.audioContext) {
+      const AudioContextCtor = global.AudioContext || global.webkitAudioContext;
+      sound.audioContext = new AudioContextCtor();
+    }
+    if (sound.audioContext.state === "suspended") {
+      sound.audioContext.resume();
+    }
+    return sound.audioContext;
+  }
+
+  function playSyntheticMiao() {
+    const context = unlockAudio();
+    if (!context) {
+      return;
+    }
+
+    const now = context.currentTime;
+    const gain = context.createGain();
+    const osc = context.createOscillator();
+    const filter = context.createBiquadFilter();
+    osc.type = "sawtooth";
+    filter.type = "bandpass";
+    filter.frequency.setValueAtTime(940, now);
+    filter.frequency.exponentialRampToValueAtTime(520, now + 0.46);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.18, now + 0.04);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.52);
+    osc.frequency.setValueAtTime(760, now);
+    osc.frequency.exponentialRampToValueAtTime(390, now + 0.48);
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(context.destination);
+    osc.start(now);
+    osc.stop(now + 0.54);
+  }
+
+  function playMiao(force) {
+    if (!force && !sound.enabled) {
+      return;
+    }
+    const now = global.performance.now();
+    if (!force && now - sound.lastPlayedAt < 650) {
+      return;
+    }
+    sound.lastPlayedAt = now;
+
+    if ("speechSynthesis" in global && "SpeechSynthesisUtterance" in global) {
+      const utterance = new SpeechSynthesisUtterance("i go miao");
+      utterance.rate = 1.16;
+      utterance.pitch = 1.75;
+      utterance.volume = 0.9;
+      global.speechSynthesis.cancel();
+      global.speechSynthesis.speak(utterance);
+    } else {
+      playSyntheticMiao();
+    }
+  }
+
+  function updateTurnSounds(snapshot) {
+    snapshot.state.slice(0, 2).forEach((angle, index) => {
+      const delta = wrapAngle(angle - turnTracker.previous[index]);
+      turnTracker.accumulated[index] += delta;
+      turnTracker.previous[index] = angle;
+      if (Math.abs(turnTracker.accumulated[index] - turnTracker.marker[index]) >= Math.PI * 2) {
+        turnTracker.marker[index] = turnTracker.accumulated[index];
+        playMiao(false);
+      }
+    });
   }
 
   function drawBackground(context, width, height) {
@@ -243,15 +350,8 @@
     context.arc(pivot.x, pivot.y, 7, 0, Math.PI * 2);
     context.fill();
 
-    context.fillStyle = "#0d7c83";
-    context.beginPath();
-    context.arc(p1.x, p1.y, 16, 0, Math.PI * 2);
-    context.fill();
-
-    context.fillStyle = "#c85645";
-    context.beginPath();
-    context.arc(p2.x, p2.y, 20, 0, Math.PI * 2);
-    context.fill();
+    drawCatBob(context, catFaces.first, p1, 42, "#0d7c83", snapshot.state[2]);
+    drawCatBob(context, catFaces.second, p2, 52, "#c85645", snapshot.state[3]);
 
     context.strokeStyle = "rgba(29, 35, 41, 0.18)";
     context.lineWidth = 1.5;
@@ -261,6 +361,27 @@
     context.beginPath();
     context.arc(p1.x, p1.y, snapshot.params.l2 * scale, 0, Math.PI * 2);
     context.stroke();
+
+    context.restore();
+  }
+
+  function drawCatBob(context, image, point, size, fallbackColor, omega) {
+    context.save();
+    context.translate(point.x, point.y);
+    context.rotate(clamp(omega * 0.04, -0.32, 0.32));
+    context.fillStyle = "rgba(29, 35, 41, 0.18)";
+    context.beginPath();
+    context.arc(3, 5, size * 0.47, 0, Math.PI * 2);
+    context.fill();
+
+    if (image.complete && image.naturalWidth > 0) {
+      context.drawImage(image, -size * 0.5, -size * 0.5, size, size);
+    } else {
+      context.fillStyle = fallbackColor;
+      context.beginPath();
+      context.arc(0, 0, size * 0.38, 0, Math.PI * 2);
+      context.fill();
+    }
 
     context.restore();
   }
@@ -405,6 +526,7 @@
     if (running) {
       const speed = Number(els.speedInput.value);
       sim.step(dt * speed);
+      updateTurnSounds(sim.snapshot());
       sampleCarry += dt * speed;
       if (sampleCarry >= 1 / 30) {
         pushHistory();
@@ -433,6 +555,15 @@
     running = true;
   });
 
+  els.miaoButton.addEventListener("click", () => {
+    sound.enabled = !sound.enabled;
+    if (sound.enabled) {
+      unlockAudio();
+      playMiao(true);
+    }
+    syncOutputLabels();
+  });
+
   document.querySelectorAll("[data-preset]").forEach((button) => {
     button.addEventListener("click", () => {
       applyPreset(button.dataset.preset);
@@ -446,6 +577,7 @@
     els.kickInput,
     els.gravityInput,
     els.mass2Input,
+    els.length1Input,
     els.length2Input,
     els.dampingInput
   ].forEach((input) => {
@@ -471,4 +603,3 @@
   applyInputs();
   global.requestAnimationFrame(frame);
 })(window);
-

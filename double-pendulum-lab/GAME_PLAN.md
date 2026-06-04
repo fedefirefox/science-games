@@ -6,9 +6,9 @@ The player tunes a chaotic mechanical system, launches it, and learns from the a
 
 ## Core Loop
 
-1. Pick a preset or tune the initial angles, kick, gravity, mass, length, damping, and speed.
+1. Pick a preset or tune the initial angles, kick, gravity, mass, thread lengths, damping, and speed.
 2. Launch the pendulum and watch the physical animation, bob trail, phase portrait, and angle traces.
-3. Read score, energy drift, and chaos separation.
+3. Read score, energy drift, and chaos separation. If miao mode is enabled, each full 360-degree turn plays a small "i go miao" cue.
 4. Retune the setup to produce a calmer orbit, a larger chaotic bloom, or a cleaner low-drift run.
 5. Later progression can add timed challenge cards: calm orbit, chaos bloom, energy conservation, target phase-shape, and prediction rounds.
 
@@ -18,6 +18,7 @@ The player tunes a chaotic mechanical system, launches it, and learns from the a
 - `src/simulation.js` owns the equation solver and saveable state.
 - `src/app.js` owns browser input, canvas rendering, plotting, score calculation, and the animation loop.
 - `styles.css` owns responsive layout and visual treatment.
+- `assets/cat-faces/` provides bundled local SVG cat faces for the pendulum bobs.
 
 ## Equation Solver
 
@@ -37,4 +38,3 @@ This first version is a static browser app. A person can access it in three ways
 3. Public web: push the folder to a static host such as GitHub Pages, Netlify, Vercel, or Cloudflare Pages and share the generated URL.
 
 Because the page uses normal script tags instead of module imports, opening the local file directly works for this prototype.
-
