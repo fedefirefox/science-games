@@ -14,7 +14,7 @@ The game should open directly in Chrome, Edge, Firefox, or Safari.
 
 No build step, package install, account, or backend is required.
 
-The cat-face bob images are included in the download, so the game still works offline.
+The cat-face bob images and real cat meow sound are included in the download, so the game still works offline.
 
 ## Optional Local Server
 
@@ -51,6 +51,7 @@ If this becomes a multi-project collection, the public version should usually ha
 - `index.html` - browser entry point
 - `styles.css` - responsive app styling
 - `assets/cat-faces/` - bundled cat-face bob images
+- `assets/audio/` - bundled cat meow audio used by the miao mode
 - `src/simulation.js` - double pendulum equations, RK4 integration, energy, and chaos diagnostics
 - `src/app.js` - input handling, animation, plotting, scoring, and UI readouts
 - `GAME_PLAN.md` - core loop and access plan

@@ -19,7 +19,7 @@
   };
   const sound = {
     enabled: false,
-    audioContext: null,
+    clip: null,
     lastPlayedAt: 0
   };
   let running = true;
@@ -28,6 +28,8 @@
 
   catFaces.first.src = "assets/cat-faces/noto-cat-open-mouth.svg";
   catFaces.second.src = "assets/cat-faces/noto-cat-heart-eyes.svg";
+
+  sound.clip = createMiaoClip();
 
   const els = {
     pendulumCanvas: document.getElementById("pendulumCanvas"),
@@ -188,44 +190,14 @@
     applyInputs();
   }
 
-  function unlockAudio() {
-    if (!global.AudioContext && !global.webkitAudioContext) {
-      return null;
-    }
-    if (!sound.audioContext) {
-      const AudioContextCtor = global.AudioContext || global.webkitAudioContext;
-      sound.audioContext = new AudioContextCtor();
-    }
-    if (sound.audioContext.state === "suspended") {
-      sound.audioContext.resume();
-    }
-    return sound.audioContext;
-  }
-
-  function playSyntheticMiao() {
-    const context = unlockAudio();
-    if (!context) {
-      return;
-    }
-
-    const now = context.currentTime;
-    const gain = context.createGain();
-    const osc = context.createOscillator();
-    const filter = context.createBiquadFilter();
-    osc.type = "sawtooth";
-    filter.type = "bandpass";
-    filter.frequency.setValueAtTime(940, now);
-    filter.frequency.exponentialRampToValueAtTime(520, now + 0.46);
-    gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.exponentialRampToValueAtTime(0.18, now + 0.04);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.52);
-    osc.frequency.setValueAtTime(760, now);
-    osc.frequency.exponentialRampToValueAtTime(390, now + 0.48);
-    osc.connect(filter);
-    filter.connect(gain);
-    gain.connect(context.destination);
-    osc.start(now);
-    osc.stop(now + 0.54);
+  function createMiaoClip() {
+    const clip = document.createElement("audio");
+    const canUseOgg = clip.canPlayType('audio/ogg; codecs="vorbis"') !== "";
+    clip.src = canUseOgg ? "assets/audio/miao-cat.ogg" : "assets/audio/miao-cat.mp3";
+    clip.preload = "auto";
+    clip.volume = 0.82;
+    clip.load();
+    return clip;
   }
 
   function playMiao(force) {
@@ -238,15 +210,18 @@
     }
     sound.lastPlayedAt = now;
 
-    if ("speechSynthesis" in global && "SpeechSynthesisUtterance" in global) {
-      const utterance = new SpeechSynthesisUtterance("i go miao");
-      utterance.rate = 1.16;
-      utterance.pitch = 1.75;
-      utterance.volume = 0.9;
-      global.speechSynthesis.cancel();
-      global.speechSynthesis.speak(utterance);
-    } else {
-      playSyntheticMiao();
+    if (!sound.clip) {
+      return;
+    }
+    sound.clip.pause();
+    try {
+      sound.clip.currentTime = 0;
+    } catch (error) {
+      // Some browsers delay seeking local media until metadata is available.
+    }
+    const playPromise = sound.clip.play();
+    if (playPromise && playPromise.catch) {
+      playPromise.catch(() => {});
     }
   }
 
@@ -558,7 +533,6 @@
   els.miaoButton.addEventListener("click", () => {
     sound.enabled = !sound.enabled;
     if (sound.enabled) {
-      unlockAudio();
       playMiao(true);
     }
     syncOutputLabels();

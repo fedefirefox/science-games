@@ -8,7 +8,7 @@ The player tunes a chaotic mechanical system, launches it, and learns from the a
 
 1. Pick a preset or tune the initial angles, kick, gravity, mass, thread lengths, damping, and speed.
 2. Launch the pendulum and watch the physical animation, bob trail, phase portrait, and angle traces.
-3. Read score, energy drift, and chaos separation. If miao mode is enabled, each full 360-degree turn plays a small "i go miao" cue.
+3. Read score, energy drift, and chaos separation. If miao mode is enabled, each full 360-degree turn plays a real cat meow cue.
 4. Retune the setup to produce a calmer orbit, a larger chaotic bloom, or a cleaner low-drift run.
 5. Later progression can add timed challenge cards: calm orbit, chaos bloom, energy conservation, target phase-shape, and prediction rounds.
 
@@ -19,6 +19,7 @@ The player tunes a chaotic mechanical system, launches it, and learns from the a
 - `src/app.js` owns browser input, canvas rendering, plotting, score calculation, and the animation loop.
 - `styles.css` owns responsive layout and visual treatment.
 - `assets/cat-faces/` provides bundled local SVG cat faces for the pendulum bobs.
+- `assets/audio/` provides the bundled local cat meow used by miao mode.
 
 ## Equation Solver
 
