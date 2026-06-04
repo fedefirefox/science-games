@@ -2,31 +2,43 @@
 
 Interactive browser prototype for a science game about the double pendulum equation. It animates the mechanism, draws the bob trail, plots a phase portrait and angle traces, and scores the run using energy drift plus shadow-pendulum separation.
 
-## Open It
+## How To Play
 
-Open this file in a browser:
+1. Download the `double-pendulum-lab` folder.
+   - If it comes from GitHub, use **Code > Download ZIP**, then unzip it.
+   - Keep the files together in the same folder.
+2. Open the folder on your computer.
+3. Double-click `index.html`, or right-click it and choose your browser.
 
-`C:\Users\feder\Documents\GitHub\science games\double-pendulum-lab\index.html`
+The game should open directly in Chrome, Edge, Firefox, or Safari.
 
-No build step, package install, or backend is required.
+No build step, package install, account, or backend is required.
 
 ## Optional Local Server
 
-From this folder:
+Opening `index.html` directly is enough for this version. If your browser blocks local files, start a small local server instead.
+
+From inside the `double-pendulum-lab` folder, run:
 
 ```powershell
 py -3 -m http.server 8000
 ```
 
-Then open:
+Then visit:
 
 `http://localhost:8000/`
 
+On macOS or Linux, this command is usually:
+
+```bash
+python3 -m http.server 8000
+```
+
 ## Public Access
 
-This can be published as a static site. The simplest routes are:
+To let other people play without downloading the folder, publish it as a static site:
 
-- Put the `science games` folder in a GitHub repository and enable GitHub Pages.
+- Put the folder in a GitHub repository and enable GitHub Pages.
 - Deploy `double-pendulum-lab` to Netlify, Vercel, or Cloudflare Pages.
 - Share the resulting HTTPS URL.
 
@@ -39,4 +51,3 @@ If this becomes a multi-project collection, the public version should usually ha
 - `src/simulation.js` - double pendulum equations, RK4 integration, energy, and chaos diagnostics
 - `src/app.js` - input handling, animation, plotting, scoring, and UI readouts
 - `GAME_PLAN.md` - core loop and access plan
-
