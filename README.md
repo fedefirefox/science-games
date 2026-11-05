@@ -9,13 +9,15 @@ Small browser games and interactive simulations for science topics.
 
 ## Browser access
 
-After GitHub Pages publication from `main` / repository root:
+Public hosted simulations (source maintained in this repository):
 
-- [Double Pendulum Lab](https://fedefirefox.github.io/science-games/double-pendulum-lab/)
-- [XLEAP Timing Laboratory](https://fedefirefox.github.io/science-games/xleap-timing-lab/)
+- [Double Pendulum Lab](https://fede-science-games.fedefirefox.chatgpt.site/double-pendulum-lab/)
+- [XLEAP Timing Laboratory](https://fede-science-games.fedefirefox.chatgpt.site/xleap-timing-lab/)
 
 Each project is contained in its own folder. See each project's README for local launch instructions.
 
 ## Licensing
 
 See [LICENSING.md](LICENSING.md) for project-specific terms. XLEAP code is MIT-licensed; the SLAC logo and institutional marks are excluded.
+
+GitHub Pages is not enabled by this release. This public host serves the repository's static applications; no visitor sign-in is required.

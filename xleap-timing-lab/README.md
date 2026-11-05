@@ -6,8 +6,8 @@ A standalone educational explorer of the relative arrival times of two soft-X-ra
 
 Open `index.html` directly in a modern browser. No installation, server, account, CDN, private data or API key is required. All CSS, JavaScript and SVG plot generation are inline. The official SLAC logo is bundled locally in `assets/`; keep that folder beside `index.html`. External links open scientific references; calculations make no network requests. Settings are retained in browser-local storage when available.
 
-Public URL (requires GitHub Pages to be enabled):
-https://fedefirefox.github.io/science-games/xleap-timing-lab/
+Public hosted URL:
+https://fede-science-games.fedefirefox.chatgpt.site/xleap-timing-lab/
 
 ## Physics and signs
 
