@@ -2,7 +2,11 @@
 
 Interactive browser prototype for a science game about the double pendulum equation. It animates the mechanism, draws the bob trail, plots a phase portrait and angle traces, and scores the run using energy drift plus shadow-pendulum separation.
 
-## How To Play
+## Play Online
+
+[Open Double Pendulum Lab](https://fede-science-games.fedefirefox.chatgpt.site/double-pendulum-lab/). The simulation runs in your browser without a download or sign-in.
+
+## Play Offline
 
 1. Download the `double-pendulum-lab` folder.
    - If it comes from GitHub, use **Code > Download ZIP**, then unzip it.
@@ -36,15 +40,6 @@ On macOS or Linux, this command is usually:
 python3 -m http.server 8000
 ```
 
-## Public Access
-
-To let other people play without downloading the folder, publish it as a static site:
-
-- Put the folder in a GitHub repository and enable GitHub Pages.
-- Deploy `double-pendulum-lab` to Netlify, Vercel, or Cloudflare Pages.
-- Share the resulting HTTPS URL.
-
-If this becomes a multi-project collection, the public version should usually have a small landing index that links to `/double-pendulum-lab/`.
 
 ## Files
 
